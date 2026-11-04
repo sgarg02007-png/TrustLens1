@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="TRUSTLENS - AI-assisted news credibility analyzer">
+<title>TRUSTLENS | News credibility analyzer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;800&family=Fraunces:opsz,wght@9..144,500;700&family=DM+Sans:wght@400;500;600&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--a:#c1552b;--b:#e0a458;--bg:#f3eadb;--card:rgba(255,252,246,.72);--ink:#2a1f16;--mute:#7a6a58;--line:rgba(70,45,20,.16);--ok:#4f7a3c;--mid:#c98a1b;--bad:#b83a32}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{background:radial-gradient(900px 500px at 88% -8%,color-mix(in srgb,var(--b) 30%,transparent),transparent),radial-gradient(800px 520px at -10% 35%,color-mix(in srgb,var(--a) 14%,transparent),transparent),var(--bg);color:var(--ink);font:400 16px/1.65 'DM Sans',system-ui,sans-serif;min-height:100vh;transition:background .6s}
+#bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#sp{position:fixed;top:0;left:0;height:3px;width:0;z-index:9;background:linear-gradient(90deg,var(--a),var(--b))}
+button{font-family:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--a);outline-offset:2px}
+.nav{position:sticky;top:0;z-index:4;background:color-mix(in srgb,var(--bg) 72%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav>div{max-width:1040px;margin:0 auto;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
+.mark{transition:transform .5s cubic-bezier(.2,1.4,.4,1)}.brand:hover .mark{transform:rotate(-14deg) scale(1.1)}
+.wm{font:800 21px Unbounded,'Arial Black',sans-serif;letter-spacing:-.04em}
+.wm b{font-weight:800;background:linear-gradient(120deg,var(--a),var(--b));-webkit-background-clip:text;background-clip:text;color:transparent}
+.tools{display:flex;gap:10px;align-items:center}
+.dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--ink);cursor:pointer;padding:0}
+.btn{font-weight:500;font-size:15px;border:1px solid var(--line);background:rgba(255,255,255,.55);padding:8px 16px;border-radius:999px;cursor:pointer;transition:background .2s,border-color .2s,transform .2s}
+.btn:hover{background:#fff;border-color:var(--a);transform:translateY(-1px)}
+.wrap{position:relative;z-index:1;max-width:1040px;margin:0 auto;padding:44px 18px 70px}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:24px;align-items:center;margin-bottom:34px}
+.pill{display:inline-block;font-size:13px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--a);border:1px solid var(--line);background:rgba(255,255,255,.5);border-radius:999px;padding:4px 14px;margin-bottom:16px}
+h1{font:700 clamp(36px,5.6vw,60px)/1.05 Fraunces,Georgia,serif;margin-bottom:14px}
+h1 em{color:var(--a);font-style:italic}
+.lead{color:var(--mute);font-size:18px;max-width:34em}
+.hv svg{width:100%;height:auto;max-width:400px;display:block;margin:0 auto;animation:float 6s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-12px)}}
+.card{background:var(--card);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:0 24px 50px -32px rgba(80,50,20,.45)}
+.tabs{display:flex;gap:6px;margin-bottom:16px;background:rgba(70,45,20,.07);padding:5px;border-radius:14px;width:fit-content}
+.tab{font-weight:500;font-size:15px;padding:8px 20px;border-radius:10px;border:0;background:transparent;color:var(--mute);cursor:pointer}
+.tab.on{background:linear-gradient(120deg,var(--a),var(--b));color:#fff}
+textarea,input[type=text],input[type=search]{width:100%;background:rgba(255,255,255,.7);border:1px solid var(--line);border-radius:14px;color:var(--ink);font:400 16px 'DM Sans',sans-serif;padding:14px}
+textarea::placeholder,input::placeholder{color:var(--mute)}
+textarea{min-height:150px;resize:vertical}
+.meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:8px;font-size:14px;color:var(--mute)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip,.fc,.mc{font-size:14px;border:1px solid var(--line);background:rgba(255,255,255,.5);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip:hover,.mc:hover,.fc.on{border-color:var(--a);color:var(--a)}
+.drop{display:block;border:2px dashed var(--line);border-radius:18px;padding:30px;text-align:center;cursor:pointer;margin-bottom:10px;color:var(--mute)}
+.drop.has{border-color:var(--a);color:var(--ink)}
+.go{margin-top:16px;width:100%;font:800 16px Unbounded,sans-serif;letter-spacing:-.02em;border:0;border-radius:16px;padding:16px;cursor:pointer;color:#fff;background:linear-gradient(120deg,var(--a),var(--b));transition:transform .15s,box-shadow .2s}
+.go:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 28px -10px var(--a)}
+.go:disabled{opacity:.65;cursor:wait}
+.err{color:var(--bad);margin-top:10px;min-height:1px}
+#progress{margin-top:20px}
+#steps{list-style:none;padding:0;display:grid;gap:8px}
+#steps li{padding:10px 14px;border-radius:12px;border:1px solid var(--line);color:var(--mute)}
+#steps li.act{border-color:var(--a);color:var(--ink);animation:pulse 1.2s infinite}
+#steps li.done{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,transparent)}
+@keyframes pulse{50%{opacity:.55}}
+@keyframes rise{from{opacity:0;transform:translateY(24px) scale(.98)}}
+#result{margin-top:22px}#result:not([hidden]){animation:rise .6s cubic-bezier(.2,.8,.2,1)}
+.top{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+.gauge{position:relative;width:132px;height:132px;flex:none}
+.gauge b{position:absolute;inset:0;display:grid;place-items:center;font:700 34px 'Space Mono',monospace}
+.verdict{font:700 32px/1.1 Fraunces,Georgia,serif}.stars{letter-spacing:.2em;font-size:20px}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+.sec{margin-top:22px}.sec h3,.col h3{font:700 19px Fraunces,Georgia,serif;margin-bottom:8px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
+.col{border-radius:18px;padding:16px;border:1px solid}
+.col.r{background:color-mix(in srgb,var(--ok) 10%,transparent);border-color:color-mix(in srgb,var(--ok) 45%,transparent)}.col.w{background:color-mix(in srgb,var(--bad) 9%,transparent);border-color:color-mix(in srgb,var(--bad) 45%,transparent)}
+ul{padding-left:20px}li{margin:5px 0}
+.note{margin-top:14px;font-size:14px;color:var(--mute)}
+small{color:var(--mute)}
+.gs{display:grid;grid-template-columns:1fr 1fr;gap:18px 24px}
+.spec{position:relative;height:12px;border-radius:99px;margin:12px 0 6px;background:linear-gradient(90deg,var(--bad),var(--mid),var(--ok))}
+.spec span{position:absolute;top:-5px;width:5px;height:22px;border-radius:3px;background:var(--ink);transform:translateX(-50%);box-shadow:0 0 0 3px var(--bg)}
+.stack{display:flex;height:14px;border-radius:99px;overflow:hidden;margin:12px 0 6px;background:var(--line)}
+.lbls{display:flex;justify-content:space-between}
+.sg{display:grid;grid-template-columns:130px 1fr 34px;gap:8px;align-items:center;margin-top:8px;font-size:14px}
+.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--a),var(--b))}
+.core{grid-column:1/-1;padding:14px;border-radius:16px;background:rgba(255,255,255,.6);border-left:4px solid var(--a)}
+.how{margin-top:64px}.how h2{font:700 clamp(28px,4vw,40px)/1.1 Fraunces,Georgia,serif;margin-bottom:22px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.g3 article svg{width:100%;max-width:150px;height:auto;display:block;margin-bottom:10px}
+.g3 h3{font:700 19px Fraunces,Georgia,serif;margin-bottom:4px}.g3 p{color:var(--mute);font-size:15px}
+.tile{border-top:5px solid var(--a)}.tile.ok{border-top-color:var(--ok)}.tile.bd{border-top-color:var(--bad)}.tile.md{border-top-color:var(--mid)}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.rv{opacity:0;transform:translateY(30px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1);transition-delay:var(--d,0s)}
+.pop{opacity:0;transform:scale(.55) rotate(-8deg);transition:opacity .5s ease,transform .8s cubic-bezier(.2,1.5,.4,1);transition-delay:var(--d,.15s)}
+.in{opacity:1;transform:none}
+footer{margin-top:44px;text-align:center;font-size:14px;color:var(--mute)}
+.ov{position:fixed;inset:0;background:rgba(40,25,10,.35);z-index:5;opacity:0;visibility:hidden;transition:opacity .3s,visibility 0s .3s}
+.ov.open{opacity:1;visibility:visible;transition-delay:0s}
+aside{position:fixed;top:0;right:0;height:100%;width:min(400px,100%);z-index:6;background:color-mix(in srgb,var(--bg) 94%,#fff);border-left:1px solid var(--line);padding:20px;overflow:auto;transform:translateX(100%);visibility:hidden;transition:transform .35s,visibility 0s .35s}
+aside.open{transform:none;visibility:visible;transition-delay:0s}
+.hi{display:flex;gap:12px;width:100%;text-align:left;padding:12px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.6);margin-top:10px;cursor:pointer}
+.hi:hover{border-color:var(--a)}.pip{flex:none;width:10px;height:10px;border-radius:50%;margin-top:8px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,30px);opacity:0;z-index:9;background:var(--ink);color:var(--bg);padding:10px 20px;border-radius:999px;transition:.3s;pointer-events:none}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:820px){.hero,.g3,.g4{grid-template-columns:1fr}.hv{order:-1;max-width:260px;margin:0 auto}}
+@media(max-width:640px){.cols,.gs{grid-template-columns:1fr}.acts{margin-left:0}.sg{grid-template-columns:100px 1fr 30px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.rv,.pop{opacity:1;transform:none}}
+.stage{position:relative;aspect-ratio:1/1;width:100%;max-width:400px;margin:0 auto;border-radius:30px;background:radial-gradient(circle at 50% 38%,#3b2417,#150e09 72%);overflow:hidden;box-shadow:0 30px 60px -30px rgba(60,30,10,.7),inset 0 0 0 1px rgba(255,255,255,.06);animation:float 6s ease-in-out infinite}
+#pc{width:100%;height:100%;display:block;cursor:crosshair}
+.reveal{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);font:600 12px 'DM Sans',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#f6e7d3;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:6px 16px;cursor:pointer;backdrop-filter:blur(6px)}
+.reveal:hover{background:rgba(255,255,255,.22)}
+#head{transform-origin:150px 200px;transition:transform .12s ease-out}
+.pup{transition:transform .08s ease-out}.eye{transform-origin:center;transform-box:fill-box;animation:blink 5s infinite}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
+.say{margin:8px auto 0;width:fit-content;max-width:100%;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 16px;font-size:14px;text-align:center}
+@media print{:root{--ink:#000;--mute:#333;--bg:#fff}body{background:#fff}#bg,#sp,.nav,#input,#progress,aside,.ov,.acts,.hero,.how,#toast,footer{display:none!important}.card{background:#fff;border:1px solid #999;backdrop-filter:none;box-shadow:none}.core{background:#f3f3f3}}
+</style></head><body>
+<canvas id="bg" aria-hidden="true"></canvas><div id="sp"></div>
+<nav class="nav"><div><a class="brand" href="#" aria-label="TrustLens home"><svg class="mark" viewBox="0 0 40 40" width="34" height="34" aria-hidden="true"><defs><linearGradient id="lg" x1="0" x2="1"><stop offset="0" style="stop-color:var(--a)"/><stop offset="1" style="stop-color:var(--b)"/></linearGradient></defs><circle cx="17" cy="17" r="11" fill="none" stroke="url(#lg)" stroke-width="5"/><path d="M26 26l10 10" stroke="var(--a)" stroke-width="5" stroke-linecap="round"/><path d="M11.5 17.5l4 4 7-8" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="wm">TRUST<b>LENS</b></span></a>
+<div class="tools"><small id="ai"></small>
+<button class="dot" data-t="beige" style="background:linear-gradient(135deg,#c1552b,#e0a458)" aria-label="Beige theme"></button><button class="dot" data-t="white" style="background:linear-gradient(135deg,#1f6f6b,#e0a458)" aria-label="White theme"></button><button class="dot" data-t="sage" style="background:linear-gradient(135deg,#5c7a3a,#c8a24a)" aria-label="Sage theme"></button><button class="btn" id="hbtn">History</button></div></div></nav>
+<main class="wrap">
+<section class="hero"><div><span class="pill">AI-assisted credibility check</span>
+<h1>Verify news with <em>evidence</em>, not guesswork.</h1>
+<p class="lead">Paste an article, drop a link, or upload a screenshot or document. TrustLens separates what holds up from what does not, and rates how far to trust it.</p></div>
+<div class="hv" id="hv"><div class="stage"><canvas id="pc" role="img" aria-label="A glowing particle portrait whose eyes follow your cursor; move the cursor over it to scatter the dust"></canvas><button class="reveal" id="rvl" type="button">Reveal</button></div><div class="say" id="say" aria-live="polite">Hi, I am Lens. Paste a story and I will check it.</div><div class="chips" id="moods" style="justify-content:center;margin-top:10px"><small>Preview moods:</small><button class="mc" data-mo="great">Great</button><button class="mc" data-mo="happy">Good</button><button class="mc" data-mo="ok">Okay</button><button class="mc" data-mo="meh">Unsure</button><button class="mc" data-mo="worried">Doubtful</button><button class="mc" data-mo="alarm">Alarm</button></div></div></section>
+<section class="card" id="input">
+<div class="tabs" role="tablist" aria-label="Input type"><button class="tab on" role="tab" aria-selected="true" data-m="text">Text</button><button class="tab" role="tab" aria-selected="false" data-m="link">Link</button><button class="tab" role="tab" aria-selected="false" data-m="file">File</button></div>
+<div id="p-text"><textarea id="txt" aria-label="News text" placeholder="Paste the headline or full article here"></textarea>
+<div class="meta"><div class="chips"><span>Try a sample:</span><button class="chip" data-s="real">Credible</button><button class="chip" data-s="fake">Misleading</button><button class="chip" data-s="tricky">Tricky</button></div><span id="cnt">0 characters</span></div></div>
+<div id="p-link" hidden><input type="text" id="lnk" aria-label="Article link" placeholder="https://example.com/news-story"></div>
+<div id="p-file" hidden>
+<label class="drop" id="drop"><input type="file" id="fl" accept="image/*,video/*,.pdf,.txt" hidden><span id="fname">Drop or choose a photo, video, PDF or text file (max 5 MB)</span></label>
+<input type="text" id="cap" aria-label="Caption" placeholder="Caption or transcript (needed for videos)"></div>
+<button class="go" id="go">Analyze</button><div class="meta"><span>Tip: press Ctrl+Enter to analyze</span></div><div class="err" id="err" role="alert"></div>
+</section>
+<section class="card" id="progress" hidden aria-live="polite"><ul id="steps"><li>Reading the content</li><li>Extracting the core claim</li><li>Checking tone, sources and evidence</li><li>Scoring credibility</li></ul></section>
+<section id="result" class="card" hidden aria-live="polite"></section>
+<section class="how"><h2 class="rv">How TrustLens works</h2><div class="g3">
+<article class="card rv"><svg class="pop" viewBox="0 0 120 90" aria-hidden="true"><rect x="22" y="6" width="64" height="78" rx="8" style="fill:#fff;stroke:var(--line);stroke-width:2"/><rect x="32" y="20" width="44" height="6" rx="3" style="fill:var(--a)"/><rect x="32" y="34" width="44" height="5" rx="2.5" style="fill:var(--line)"/><rect x="32" y="46" width="34" height="5" rx="2.5" style="fill:var(--line)"/><path d="M84 54l22 16-10 3-4 10z" style="fill:var(--ink)"/></svg><h3>1. Add the news</h3><p>Paste text, drop a link, or upload a photo, PDF or video caption.</p></article>
+<article class="card rv" style="--d:.12s"><svg class="pop" viewBox="0 0 120 90" aria-hidden="true" style="--d:.3s"><rect x="14" y="48" width="14" height="30" rx="4" style="fill:var(--b)"/><rect x="36" y="34" width="14" height="44" rx="4" style="fill:var(--a)"/><rect x="58" y="22" width="14" height="56" rx="4" style="fill:var(--b)"/><circle cx="82" cy="40" r="22" style="fill:rgba(255,255,255,.6);stroke:var(--ink);stroke-width:6"/><path d="M98 56l14 14" style="stroke:var(--ink);stroke-width:8;stroke-linecap:round"/></svg><h3>2. We analyze it</h3><p>Tone, sourcing and evidence are checked by rules and, optionally, AI.</p></article>
+<article class="card rv" style="--d:.24s"><svg class="pop" viewBox="0 0 120 90" aria-hidden="true" style="--d:.45s"><path d="M20 70a40 40 0 0180 0" style="fill:none;stroke:var(--line);stroke-width:12;stroke-linecap:round"/><path d="M20 70a40 40 0 0166-30" style="fill:none;stroke:var(--ok);stroke-width:12;stroke-linecap:round"/><path d="M60 70l22-24" style="stroke:var(--ink);stroke-width:5;stroke-linecap:round"/><circle cx="60" cy="70" r="6" style="fill:var(--ink)"/></svg><h3>3. You get a rating</h3><p>A clear verdict out of 100 with reasons you can verify yourself.</p></article></div></section>
+<section class="how"><h2 class="rv">What you get</h2><div class="g4">
+<article class="card tile rv"><h3>Core claim</h3><p>The main point of the story in plain language.</p></article>
+<article class="card tile ok rv" style="--d:.1s"><h3>What is right</h3><p>Credible, well-sourced parts of the content.</p></article>
+<article class="card tile bd rv" style="--d:.2s"><h3>What is wrong</h3><p>Errors, unsupported claims and manipulation signs.</p></article>
+<article class="card tile md rv" style="--d:.3s"><h3>Trust rating</h3><p>Stars, a 0 to 100 score and a graphical summary.</p></article></div></section>
+<footer>TrustLens gives credibility estimates, not proof. Confirm important claims with trusted sources.</footer>
+</main>
+<div class="ov" id="ov"></div>
+<aside id="hist" aria-label="History"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h2 style="font:800 22px Syne,sans-serif">History</h2><div><button class="btn" id="clr">Clear</button> <button class="btn" id="cls">Close</button></div></div>
+<input type="search" id="hq" placeholder="Search history" aria-label="Search history" style="margin-top:14px">
+<div class="chips" style="margin-top:10px"><button class="fc on" data-v="all">All</button><button class="fc" data-v="Likely Real">Real</button><button class="fc" data-v="Uncertain">Uncertain</button><button class="fc" data-v="Likely Fake">Fake</button></div>
+<p class="note" id="hs"></p><div id="hl"></div></aside>
+<div id="toast" role="status"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>window.THREE||document.write('<script src="three.min.js"><\/script>')</script>
+<script src="config.js"></script>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const API=(window.TRUSTLENS_API||"http://localhost:8000").replace(/\/$/,"");
+let CID="";try{CID=localStorage.getItem("tl-cid")||"";if(!CID){CID=(crypto.randomUUID?crypto.randomUUID():String(Math.random()).slice(2)+Date.now());localStorage.setItem("tl-cid",CID)}}catch(e){CID=String(Math.random()).slice(2)}
+const HD={"X-Client-Id":CID};
+let mode="text",file=null,boost=1,hist=[],vf="all",last=null,timer=null;
+const SAMPLES={
+ real:"According to city officials, the council approved a 12% increase in the public transport budget for 2025 on Monday. A spokesperson said a study of ridership data from 2023 supported the decision, and the report was published on the council website.",
+ fake:"SHOCKING!!! Doctors don't want you to know this miracle cure that BIG PHARMA has BANNED!!! Share before they delete this secret EXPOSED!!!",
+ tricky:"Scientists say drinking lemon water every morning can detox your liver and prevent all diseases, a new viral post claims."};
+const colr=n=>n>=70?"var(--ok)":n>=40?"var(--mid)":"var(--bad)";
+/* ---- 3D background (page still works if WebGL or the CDN is unavailable) ---- */
+const THEMES={beige:{a:"#c1552b",b:"#e0a458",bg:"#f3eadb",card:"rgba(255,252,246,.72)",ink:"#2a1f16",mute:"#7a6a58",line:"rgba(70,45,20,.16)"},white:{a:"#1f6f6b",b:"#e0a458",bg:"#fbfaf7",card:"rgba(255,255,255,.85)",ink:"#1d1d1f",mute:"#6b6b70",line:"rgba(0,0,0,.12)"},sage:{a:"#5c7a3a",b:"#c8a24a",bg:"#e8e9d9",card:"rgba(247,248,238,.78)",ink:"#26301f",mute:"#667058",line:"rgba(40,60,20,.16)"}};
+let core,ring,pts,mx=0,my=0;const still=matchMedia("(prefers-reduced-motion:reduce)").matches;
+try{
+ if(typeof THREE==="undefined")throw 0;
+ const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,100);cam.position.z=7;
+ const ren=new THREE.WebGLRenderer({canvas:$("#bg"),alpha:true,antialias:true});ren.setPixelRatio(Math.min(devicePixelRatio,2));ren.setSize(innerWidth,innerHeight);
+ core=new THREE.Mesh(new THREE.IcosahedronGeometry(2,1),new THREE.MeshBasicMaterial({wireframe:true,transparent:true,opacity:.22}));
+ ring=new THREE.Mesh(new THREE.TorusGeometry(3.3,.014,8,160),new THREE.MeshBasicMaterial());ring.rotation.x=1.1;
+ const pg=new THREE.BufferGeometry(),pos=new Float32Array(2700);for(let i=0;i<2700;i++)pos[i]=(Math.random()-.5)*30;
+ pg.setAttribute("position",new THREE.BufferAttribute(pos,3));
+ pts=new THREE.Points(pg,new THREE.PointsMaterial({size:.05,transparent:true,opacity:.4}));
+ scene.add(core,ring,pts);
+ addEventListener("pointermove",e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5});
+ addEventListener("resize",()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();ren.setSize(innerWidth,innerHeight)});
+ (function loop(){core.rotation.x+=.002*boost;core.rotation.y+=.003*boost;ring.rotation.z+=.004*boost;pts.rotation.y+=.0004*boost;
+ cam.position.x+=(mx*2-cam.position.x)*.03;cam.position.y+=(-my*2-cam.position.y)*.03;cam.lookAt(0,0,0);ren.render(scene,cam);if(!still)requestAnimationFrame(loop)})();
+}catch(e){core=ring=pts=null}
+function theme(n){if(!THEMES[n])n="beige";const t=THEMES[n],r=document.documentElement.style;
+ ["a","b","bg","card","ink","mute","line"].forEach(k=>r.setProperty("--"+k,t[k]));
+ if(core){core.material.color.set(t.a);pts.material.color.set(t.a);ring.material.color.set(t.b)}
+ try{localStorage.setItem("tl-theme",n)}catch(e){}}
+$$(".dot").forEach(d=>d.onclick=()=>theme(d.dataset.t));
+let saved="beige";try{saved=localStorage.getItem("tl-theme")||"beige"}catch(e){}theme(saved);
+/* ---- UI helpers ---- */
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
+function setMode(m){mode=m;$$(".tab").forEach(x=>{const on=x.dataset.m===m;x.classList.toggle("on",on);x.setAttribute("aria-selected",on)});["text","link","file"].forEach(k=>$("#p-"+k).hidden=k!==m)}
+$$(".tab").forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+$$(".chip").forEach(c=>c.onclick=()=>{setMode("text");$("#txt").value=SAMPLES[c.dataset.s];count();$("#txt").focus()});
+function count(){$("#cnt").textContent=$("#txt").value.length.toLocaleString()+" characters"}
+$("#txt").addEventListener("input",count);
+$("#txt").addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="Enter")analyze()});
+$("#lnk").addEventListener("keydown",e=>{if(e.key==="Enter")analyze()});
+const FDEF="Drop or choose a photo, video, PDF or text file (max 5 MB)";
+$("#fl").onchange=e=>{file=e.target.files[0]||null;$("#fname").textContent=file?file.name:FDEF;$("#drop").classList.toggle("has",!!file)};
+$("#drop").ondragover=e=>e.preventDefault();$("#drop").ondrop=e=>{e.preventDefault();$("#fl").files=e.dataTransfer.files;$("#fl").onchange({target:$("#fl")})};
+/* ---- analyze ---- */
+function busy(on){$("#go").disabled=on;$("#go").textContent=on?"Analyzing...":"Analyze";boost=on?6:1;$("#progress").hidden=!on;clearInterval(timer);
+ if(on){let i=0;const li=$$("#steps li"),tick=()=>li.forEach((e,k)=>e.className=k<i?"done":k===i?"act":"");tick();timer=setInterval(()=>{i=Math.min(i+1,li.length-1);tick()},1500)}}
+async function analyze(){
+ if($("#go").disabled)return;
+ const fd=new FormData();$("#err").textContent="";
+ if(mode==="text"){if(!$("#txt").value.trim()){$("#err").textContent="Paste some text first.";return}fd.append("text",$("#txt").value)}
+ if(mode==="link"){if(!$("#lnk").value.trim()){$("#err").textContent="Enter a link first.";return}fd.append("url",$("#lnk").value)}
+ if(mode==="file"){if(!file){$("#err").textContent="Choose a file first.";return}fd.append("file",file);fd.append("text",$("#cap").value)}
+ busy(true);setMood("think");
+ try{const r=await fetch(API+"/analyze",{method:"POST",body:fd,headers:HD});let j={};try{j=await r.json()}catch(_){}
+  if(!r.ok)throw new Error(typeof j.detail==="string"?j.detail:"Server error ("+r.status+"). Check the backend window for details.");
+  render(j);toast("Saved to history")}
+ catch(e){setMood("idle");$("#err").textContent=e.message==="Failed to fetch"?"Cannot reach the server at "+API+". Start the backend or check config.js.":e.message}
+ busy(false)}
+$("#go").onclick=analyze;
+/* ---- result ---- */
+const li=a=>a&&a.length?"<ul>"+a.map(x=>`<li>${esc(x)}</li>`).join("")+"</ul>":"<p>Nothing notable found.</p>";
+function graphic(r){
+ const R=(r.right||[]).length,W=(r.wrong||[]).length,F=(r.red_flags||[]).length,T=Math.max(1,R+W+F),p=n=>(n/T*100).toFixed(1);
+ const sig=(r.signals||[]).map(s=>`<div class="sg"><span>${esc(s.name)}</span><div class="bar"><i style="width:${s.score}%"></i></div><b>${s.score}</b></div>`).join("");
+ return `<div class="sec"><h3>Graphical summary</h3><div class="gs">
+ <div><small>Authenticity</small><div class="spec"><span style="left:${r.rating}%"></span></div><div class="lbls"><small>Fake</small><small>Uncertain</small><small>Real</small></div></div>
+ <div><small>Evidence balance</small><div class="stack"><i style="width:${p(R)}%;background:var(--ok)"></i><i style="width:${p(W)}%;background:var(--bad)"></i><i style="width:${p(F)}%;background:var(--mid)"></i></div><div class="lbls"><small>${R} right</small><small>${W} wrong</small><small>${F} red flags</small></div></div>
+ ${sig?`<div style="grid-column:1/-1"><small>Signal scores</small>${sig}</div>`:""}
+ <div class="core"><small>Core information</small><p>${esc(r.core_claim)}</p></div></div></div>`}
+function reportText(r){const L=a=>(a&&a.length?a.map(x=>"- "+x).join("\n"):"- None");
+ return `TRUSTLENS REPORT\nVerdict: ${r.verdict} (${r.rating}/100)\n\nSummary: ${r.summary}\nMain claim: ${r.core_claim}\n\nWhat is right:\n${L(r.right)}\n\nWhat is wrong:\n${L(r.wrong)}\n\nRed flags:\n${L(r.red_flags)}\n\nHow to verify: ${r.advice}\n\nCredibility estimate, not proof.`}
+async function copyReport(){const t=reportText(last);try{await navigator.clipboard.writeText(t)}catch(e){const a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();document.execCommand("copy");a.remove()}toast("Report copied")}
+function render(r){
+ last=r;setMood(moodFor(r.rating));const col=colr(r.rating),C=2*Math.PI*54,n=Math.max(0,Math.min(5,Math.round(r.rating/20)));
+ $("#result").innerHTML=`<div class="top"><div class="gauge"><svg viewBox="0 0 132 132" width="132" height="132" role="img" aria-label="Rating ${r.rating} out of 100"><circle cx="66" cy="66" r="54" fill="none" stroke="rgba(128,128,160,.25)" stroke-width="10"/><circle cx="66" cy="66" r="54" fill="none" stroke="${col}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C*r.rating/100} ${C}" transform="rotate(-90 66 66)"/></svg><b>${r.rating}</b></div>
+ <div><div class="verdict" style="color:${col}">${esc(r.verdict)}</div><div class="stars" style="color:${col}">${"★".repeat(n)}${"☆".repeat(5-n)}</div><small>Trust rating out of 100 &middot; ${esc(r.engine)}</small></div>
+ <div class="acts"><button class="btn" id="copy">Copy report</button><button class="btn" id="pdf">Save as PDF</button><button class="btn" id="again">New analysis</button></div></div>
+ ${graphic(r)}
+ <div class="sec"><h3>Core news</h3><p>${esc(r.summary)}</p></div>
+ <div class="cols"><div class="col r"><h3>What is right</h3>${li(r.right)}</div><div class="col w"><h3>What is wrong</h3>${li(r.wrong)}</div></div>
+ ${r.red_flags&&r.red_flags.length?`<div class="sec"><h3>Red flags</h3>${li(r.red_flags)}</div>`:""}
+ <div class="sec"><h3>How to verify</h3><p>${esc(r.advice)}</p></div>${r.note?`<p class="note">${esc(r.note)}</p>`:""}
+ <p class="note">TrustLens estimates credibility; it is not proof. Confirm important claims with trusted sources.</p>`;
+ $("#copy").onclick=copyReport;$("#pdf").onclick=()=>window.print();
+ $("#again").onclick=()=>{$("#result").hidden=true;scrollTo({top:0,behavior:still?"auto":"smooth"});$("#txt").focus()};
+ $("#result").hidden=false;$("#result").scrollIntoView({behavior:still?"auto":"smooth"})}
+/* ---- history ---- */
+function openHist(){$("#hist").classList.add("open");$("#ov").classList.add("open");loadHist()}
+function closeHist(){$("#hist").classList.remove("open");$("#ov").classList.remove("open")}
+async function loadHist(){try{const r=await fetch(API+"/history",{headers:HD});hist=await r.json();drawHist()}catch(e){$("#hl").innerHTML="<p class='note'>Cannot reach the server.</p>"}}
+function drawHist(){const q=$("#hq").value.toLowerCase(),f=hist.filter(x=>(vf==="all"||x.verdict===vf)&&(x.preview+" "+x.verdict).toLowerCase().includes(q));
+ $("#hs").textContent=hist.length?`${hist.length} analyses · average rating ${Math.round(hist.reduce((a,x)=>a+x.rating,0)/hist.length)}`:"";
+ $("#hl").innerHTML=f.length?f.map(x=>`<button class="hi" data-id="${x.id}"><i class="pip" style="background:${colr(x.rating)}"></i><span><b>${esc(x.verdict)} &middot; ${x.rating}</b><br>${esc(x.preview)}<br><small>${esc(x.kind)} &middot; ${new Date(x.ts*1000).toLocaleString()}</small></span></button>`).join(""):"<p class='note'>No analyses found.</p>";
+ $$(".hi").forEach(e=>e.onclick=()=>{const x=hist.find(h=>String(h.id)===e.dataset.id);if(x){render(x.result);closeHist()}})}
+$("#hbtn").onclick=openHist;$("#cls").onclick=closeHist;$("#ov").onclick=closeHist;
+addEventListener("keydown",e=>{if(e.key==="Escape")closeHist()});
+$("#hq").addEventListener("input",drawHist);
+$$(".fc").forEach(b=>b.onclick=()=>{vf=b.dataset.v;$$(".fc").forEach(x=>x.classList.toggle("on",x===b));drawHist()});
+$("#clr").onclick=async()=>{if(!confirm("Delete all history?"))return;try{await fetch(API+"/history",{method:"DELETE",headers:HD});toast("History cleared")}catch(e){}loadHist()};
+/* ---- particle portrait: dust that scatters from the cursor; eyes follow it; face, colour and emotes follow the rating ---- */
+let pmood="idle",burst=0;
+const SAYS={idle:"Hi, I am Lens. Paste a story and I will check it.",think:"Reading closely...",great:"Excellent! This looks very credible.",happy:"This looks credible.",ok:"Mostly fine, but verify a few things.",meh:"Hard to say. Check the sources.",worried:"This looks doubtful. Be careful.",alarm:"Red alert! This looks very unreliable."};
+const moodFor=n=>n>=85?"great":n>=70?"happy":n>=55?"ok":n>=40?"meh":n>=25?"worried":"alarm";
+function setMood(m){pmood=m;burst=5;const t=$("#say");if(t)t.textContent=SAYS[m]||SAYS.idle}
+$$("#moods .mc").forEach(b=>b.onclick=()=>setMood(b.dataset.mo));
+(function(){try{
+ const PAL={idle:[18,16],think:[30,18],great:[150,22],happy:[135,25],ok:[80,25],meh:[42,12],worried:[24,10],alarm:[2,10]},
+ EM={great:["spark","heart"],happy:["spark","check"],ok:["check"],meh:["q"],worried:["drop","q"],alarm:["bang"],think:["dot"],idle:[]},
+ BR={idle:[127,127],think:[126,124],great:[122,118],happy:[125,122],ok:[127,126],meh:[128,126],worried:[130,119],alarm:[120,132]},
+ MO={idle:[184,193,200,200,216,193],great:[176,186,200,216,224,186],happy:[182,188,200,206,218,188],ok:[184,193,200,200,216,193],meh:[184,196,200,196,216,196],worried:[182,202,200,188,218,202],alarm:[178,204,200,184,222,204],think:[188,196,200,190,212,196]},
+ HF={think:.5,meh:.55,worried:1.15,alarm:.8},S=400,N=4200,dpr=Math.min(window.devicePixelRatio||1,2),cv=$("#pc");
+ cv.width=cv.height=S*dpr;const ctx=cv.getContext("2d");ctx.scale(dpr,dpr);
+ const o=document.createElement("canvas");o.width=o.height=S;const g=o.getContext("2d");g.fillStyle="#fff";
+ g.beginPath();g.arc(200,72,34,0,7);g.fill();g.beginPath();g.ellipse(200,128,68,72,0,0,7);g.fill();g.beginPath();g.ellipse(200,160,58,68,0,0,7);g.fill();g.fillRect(176,210,48,50);
+ g.beginPath();g.moveTo(50,S);g.bezierCurveTo(50,310,125,262,200,262);g.bezierCurveTo(275,262,350,310,350,S);g.closePath();g.fill();
+ const d=g.getImageData(0,0,S,S).data,edge=[],fill=[],A=(x,y)=>d[(y*S+x)*4+3]<128;
+ for(let y=3;y<S-3;y++)for(let x=3;x<S-3;x++){if(A(x,y))continue;(A(x-3,y)||A(x+3,y)||A(x,y-3)||A(x,y+3)?edge:fill).push(x,y)}
+ const hx=new Float32Array(N),hy=new Float32Array(N),x=new Float32Array(N),y=new Float32Array(N),vx=new Float32Array(N),vy=new Float32Array(N);
+ for(let i=0;i<N;i++){const src=Math.random()<.6?edge:fill,j=(Math.random()*src.length/2|0)*2;hx[i]=src[j]+Math.random()-.5;hy[i]=src[j+1]+Math.random()-.5}
+ function scatter(){for(let i=0;i<N;i++){x[i]=Math.random()*S;y[i]=Math.random()*S;vx[i]=vy[i]=0}}
+ scatter();$("#rvl").onclick=scatter;
+ let mx=-999,my=-999,tx=0,ty=0,lx=0,ly=0,t=0,ems=[];
+ addEventListener("pointermove",e=>{const r=cv.getBoundingClientRect();mx=(e.clientX-r.left)*S/r.width;my=(e.clientY-r.top)*S/r.height;
+  const dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height*.38),dd=Math.hypot(dx,dy)||1,k=Math.min(1,dd/350);tx=dx/dd*k;ty=dy/dd*k});
+ function spawn(){const ks=EM[pmood]||[];if(!ks.length)return;const sd=Math.random()<.5?-1:1;
+  ems.push({k:ks[Math.random()*ks.length|0],m:pmood,x:200+sd*(85+Math.random()*50),y:95+Math.random()*90,vx:sd*.12,vy:-.35-Math.random()*.3,life:1,rot:Math.random()*.6-.3})}
+ const SH={spark:()=>{ctx.beginPath();ctx.moveTo(0,-9);ctx.quadraticCurveTo(0,0,9,0);ctx.quadraticCurveTo(0,0,0,9);ctx.quadraticCurveTo(0,0,-9,0);ctx.quadraticCurveTo(0,0,0,-9);ctx.fill()},
+  heart:()=>{ctx.beginPath();ctx.moveTo(0,6);ctx.bezierCurveTo(-12,-2,-6,-12,0,-5);ctx.bezierCurveTo(6,-12,12,-2,0,6);ctx.fill()},
+  check:()=>{ctx.beginPath();ctx.moveTo(-7,0);ctx.lineTo(-2,6);ctx.lineTo(8,-6);ctx.stroke()},
+  drop:()=>{ctx.beginPath();ctx.moveTo(0,-9);ctx.quadraticCurveTo(8,2,0,8);ctx.quadraticCurveTo(-8,2,0,-9);ctx.fill()},
+  q:()=>{ctx.font="700 26px 'DM Sans',sans-serif";ctx.textAlign="center";ctx.fillText("?",0,8)},
+  bang:()=>{ctx.font="800 28px 'DM Sans',sans-serif";ctx.textAlign="center";ctx.fillText("!",0,9)},
+  dot:()=>{for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(-10+i*10,0,2.5+Math.sin(t*.2+i)*1.2,0,7);ctx.fill()}}};
+ function draw(ox,oy){ctx.clearRect(0,0,S,S);ctx.globalCompositeOperation="lighter";const m=pmood,[h0,hr]=PAL[m]||PAL.idle;
+  for(let b=0;b<6;b++){ctx.fillStyle=`hsla(${h0+hr*b/5},95%,${50+b*4}%,${.5+b*.08})`;ctx.beginPath();const sz=1.1+b*.28;for(let i=b;i<N;i+=6)ctx.rect(x[i]+ox,y[i]+oy,sz,sz);ctx.fill()}
+  ctx.globalCompositeOperation="source-over";ctx.shadowColor=`hsl(${h0},95%,62%)`;ctx.shadowBlur=14;ctx.strokeStyle=ctx.fillStyle="rgba(255,244,225,.96)";ctx.lineWidth=3.2;ctx.lineCap="round";
+  const bl=(t%260)<8?.15:1,gx=lx*4,gy=ly*3,br=BR[m]||BR.idle,mo=MO[m]||MO.idle;
+  for(const x0 of[178,222]){const X=x0+ox+gx,Y=148+oy+gy;ctx.beginPath();
+   if(m==="great")ctx.arc(X,Y+3,7,Math.PI*1.05,Math.PI*1.95);else ctx.ellipse(X,Y,5.5,5.5*(HF[m]||1)*bl,0,0,7);
+   m==="great"?ctx.stroke():ctx.fill()}
+  ctx.beginPath();ctx.moveTo(160+ox,br[0]+oy);ctx.lineTo(192+ox,br[1]+oy);ctx.moveTo(240+ox,br[0]+oy);ctx.lineTo(208+ox,br[1]+oy);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(mo[0]+ox,mo[1]+oy);ctx.quadraticCurveTo(mo[2]+ox,mo[3]+oy,mo[4]+ox,mo[5]+oy);ctx.stroke();
+  ctx.shadowBlur=10;for(const e of ems){ctx.globalAlpha=Math.max(0,e.life);ctx.save();ctx.translate(e.x+ox,e.y+oy);ctx.rotate(e.rot);
+   ctx.strokeStyle=ctx.fillStyle=e.k==="drop"?"#8fd3ff":`hsl(${h0},95%,70%)`;ctx.lineWidth=3;SH[e.k]();ctx.restore()}
+  ctx.globalAlpha=1;ctx.shadowBlur=0}
+ function frame(){t++;const m=pmood;lx+=(tx-lx)*.12;ly+=(ty-ly)*.12;let ox=lx*7,oy=ly*5;
+  if(m==="alarm")ox+=Math.sin(t*1.1)*2.5;if(m==="great"||m==="happy")oy+=Math.sin(t*.1)*3;
+  const jit=m==="alarm"?.5:.12;
+  for(let i=0;i<N;i++){let ax=(hx[i]-x[i])*.014,ay=(hy[i]-y[i])*.014;const rx=x[i]-(mx-ox),ry=y[i]-(my-oy),d2=rx*rx+ry*ry;
+   if(d2<6400){const dd=Math.sqrt(d2)||1,f=(1-dd/80)*3.2;ax+=rx/dd*f;ay+=ry/dd*f}
+   if(m==="think"){ax-=(y[i]-200)*.0016;ay+=(x[i]-200)*.0016}
+   vx[i]=(vx[i]+ax)*.9+(Math.random()-.5)*jit;vy[i]=(vy[i]+ay)*.9+(Math.random()-.5)*jit;x[i]+=vx[i];y[i]+=vy[i]}
+  if(burst>0&&t%4===0){spawn();burst--}if(t%45===0&&ems.length<6)spawn();
+  for(const e of ems){e.x+=e.vx;e.y+=e.vy;e.life-=e.m===m?.006:.05}ems=ems.filter(e=>e.life>0);
+  draw(ox,oy);requestAnimationFrame(frame)}
+ if(still){x.set(hx);y.set(hy);draw(0,0)}else frame();
+}catch(e){}})();
+const io="IntersectionObserver" in window?new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{threshold:.15}):null;
+$$(".rv,.pop").forEach(e=>io?io.observe(e):e.classList.add("in"));
+addEventListener("scroll",()=>{const h=document.documentElement,m=h.scrollHeight-innerHeight;$("#sp").style.width=(m>0?scrollY/m*100:0)+"%";if(!still)$("#hv").style.transform="translateY("+Math.min(scrollY*.1,50)+"px)"},{passive:true});
+fetch(API+"/health").then(r=>r.json()).then(h=>{$("#ai").textContent=h.ai?"AI: "+h.provider:"AI off (rules only)"}).catch(()=>{$("#ai").textContent="Backend offline";$("#ai").style.color="var(--bad)"});
+</script></body></html>
